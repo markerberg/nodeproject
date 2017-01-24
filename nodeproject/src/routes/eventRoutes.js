@@ -1,72 +1,40 @@
 var express = require("express");
 var eventRouter = express.Router();
-
-//eventdata
-var eventData = [  {
-                 name: 'man 1',
-                 description: 'desc man 1', 
-                 date: 'date 1', 
-                 time: 'time 1', 
-                 duration: 'dur 1',
-                 location: {
-                     street: 'st 1',
-                     city: ' city 1',
-                     state: ' state 1',
-                     zip: 'zip 1'
-                 },
-                 capacity: 1
-                 },
-                 {
-                 name: 'man 2',
-                 description: 'desc 2', 
-                 date: 'date 2', 
-                 time: 'time 2', 
-                 duration: 'dur 2',
-                 location: {
-                     street: 'st 2',
-                     city: 'city 2',
-                     state: 'state 2',
-                     zip: 'zip 2'
-                 },
-                 capacity: 2
-                 },
-                 {
-                 name: 'man 3',
-                 description: 'desc 3', 
-                 date: 'date 3', 
-                 time: 'time 3', 
-                 duration: 'dur 3',
-                 location: {
-                     street: 'st 3',
-                     city: 'city 3',
-                     state: 'state 3',
-                     zip: 'zip 3'
-                 },
-                 capacity: 3
-                 },
-];
+var mongodb = require("mongodb").MongoClient;
 
 //we must install express4 to use these express.Router
  eventRouter.route('/')
     .get(function(req, res){
-       res.render("events", { //render events.ejs with a list of all these things to inject
-        nav:[//{Link: 'stack', Text: 'Stack'},
-             //{Link: 'services', Text: 'Services'},
-             //{Link: 'portfolio', Text: 'Portfolio'},
-             {Link: 'our-events', Text: 'Our-Events'},
-            //  {Link: 'team', Text: 'Team'},
-            //  {Link: 'contact', Text: 'Contact'},
-        ],
-        events: eventData
-      }); 
+        var url = 'mongodb://localhost:27017/eventsApp';//define url
+        mongodb.connect(url, function(err, db){//making connection to db
+            var collection = db.collection('events');//address events collection
+            collection.find({}).toArray(function(err, results){//tell collection to find all event records to pull it out and put in array format to use in html
+                res.render("events", { //render events.ejs with a list of all these things to inject
+                nav:[//{Link: 'stack', Text: 'Stack'},
+                    //{Link: 'services', Text: 'Services'},
+                    //{Link: 'portfolio', Text: 'Portfolio'},
+                    {Link: 'our-events', Text: 'Our-Events'},
+                    //  {Link: 'team', Text: 'Team'},
+                    //  {Link: 'contact', Text: 'Contact'},
+                ],
+                events: results//THIS IS WHERE WE REF QUERY FROM DB, results is passed back from our .find so we pass it to events to be used in template/html
+                }); 
+            });
+        });
     });
     
 eventRouter.route('/:id')
     .get(function(req, res){
         var id = req.params.id;
-        res.render('event', { 
-        nav:[{Link: 'our-events', Text: 'Our-Events'}],
-        events: eventData[id]//as we go through array, we just want the one item to be passed
+        var url = 'mongodb://localhost:27017/eventsApp';
+        mongodb.connect(url, function(err, db){
+            var collection = db.collection('events');
+            collection.find({}).toArray(function(err, results){
+                res.render('event', { 
+                    nav:[{Link: 'our-events', Text: 'Our-Events'}],
+                    events: results[id]//as we go through array, we just want the one item to be passed
+                });
+            });
         });
 });
     

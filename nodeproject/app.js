@@ -3,6 +3,8 @@ var app = express();
 
 var port = process.env.PORT;
 var eventRouter = require("./src/routes/eventRoutes.js");
+var dbRouter = require("./src/routes/dbRoutes.js");
+
 
 app.use(express.static('public'));
 app.use(express.static('bower_components'));
@@ -12,6 +14,7 @@ app.set('views', './src/views');
 app.set('view engine', 'ejs');
 
 app.use('/events', eventRouter);//express.router way,so we look for a /events/ or /events/event and respond accordingly
+app.use('/Db', dbRouter);
 
 app.get('/', function(req, res){//another way of handling a req, without the express.router
     //res.send("Hellow orLD");
